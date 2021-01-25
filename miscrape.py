@@ -3,17 +3,17 @@ import pandas as pd
 import requests
 
 catalog_export = pd.read_csv("catalog-export.csv")
-catalog_export = catalog_export[(catalog_export["product_type"] == "configurable")]
+catalog_export = catalog_export[(catalog_export["visibility"] == "Catalog, Search")]
 urls = catalog_export["url_key"]
-docs = ["https://matsinc.com/activ-turf-pro.html"]
 headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
 page_data = pd.DataFrame()
 spec_columns = []
 
 def make_req(url):
-  site = requests.get("https://matsinc.com/" + doc, headers=headers)
+  url = str(url)
+  site = requests.get("https://matsinc.com/" + url, headers=headers)
   if (site.status_code != 200):
-    site = requests.get("https://matsinc.com/" + doc + ".html", headers=headers)
+    site = requests.get("https://matsinc.com/" + url + ".html", headers=headers)
     if (site.status_code != 200):
       return False
     else:
@@ -71,6 +71,14 @@ for doc in urls:
             "title": title,
             "description": description,
             spec_title: spec_text
+          }
+        else:
+          new_spec = {
+            "SKU": sku,
+            "name": h1,
+            "title": title,
+            "description": description,
+            "spec-text": parse_text
           }
 
         page_data = page_data.append(new_spec, ignore_index=True)
